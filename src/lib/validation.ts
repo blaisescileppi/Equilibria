@@ -34,14 +34,18 @@ const email = z
   .toLowerCase()
   .pipe(z.email("Enter a valid email address."));
 
+// bcrypt only uses the first 72 *bytes* of a password, so longer ones are
+// rejected instead of being silently truncated. Bytes, not characters:
+// "é" or an emoji takes 2-4 bytes in UTF-8.
+const MAX_PASSWORD_BYTES = 72;
+const withinBcryptLimit = (p: string) => new TextEncoder().encode(p).length <= MAX_PASSWORD_BYTES;
+
 export const signupSchema = z.object({
   email,
-  // bcrypt only uses the first 72 bytes of a password, so longer ones are
-  // rejected instead of being silently truncated.
   password: z
     .string()
     .min(8, "Use at least 8 characters.")
-    .max(72, "Use at most 72 characters."),
+    .refine(withinBcryptLimit, "That password is too long. Use at most 72 characters."),
   displayName: z
     .string()
     .trim()
@@ -51,7 +55,7 @@ export const signupSchema = z.object({
 
 export const loginSchema = z.object({
   email,
-  password: z.string().min(1, "Enter your password.").max(72),
+  password: z.string().min(1, "Enter your password.").refine(withinBcryptLimit, "Incorrect email or password."),
 });
 
 // ---------- Cycles ----------

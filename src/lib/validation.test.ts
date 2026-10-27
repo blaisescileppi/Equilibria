@@ -40,6 +40,13 @@ describe("signupSchema", () => {
     });
     expect(tooLong.success).toBe(false);
   });
+
+  it("measures the bcrypt limit in bytes, not characters", () => {
+    const base = { email: "a@b.co", displayName: "A" };
+    // 36 two-byte characters = 72 bytes: allowed. 37 = 74 bytes: rejected.
+    expect(signupSchema.safeParse({ ...base, password: "é".repeat(36) }).success).toBe(true);
+    expect(signupSchema.safeParse({ ...base, password: "é".repeat(37) }).success).toBe(false);
+  });
 });
 
 describe("cycleSchema", () => {
