@@ -7,6 +7,7 @@ import {
   isValidISODate,
   localTodayISO,
   toDate,
+  todayInTimeZone,
 } from "./dates";
 
 describe("isValidISODate", () => {
@@ -50,6 +51,13 @@ describe("date arithmetic", () => {
 
   it("formats local today without converting to UTC", () => {
     expect(localTodayISO(new Date(2026, 0, 5, 23, 30))).toBe("2026-01-05");
+  });
+
+  it("finds today in the user's time zone, not the server's", () => {
+    const lateEveningInBoston = new Date("2026-10-28T01:30:00Z"); // 9:30pm EDT on the 27th
+    expect(todayInTimeZone("America/New_York", lateEveningInBoston)).toBe("2026-10-27");
+    expect(todayInTimeZone("UTC", lateEveningInBoston)).toBe("2026-10-28");
+    expect(todayInTimeZone("Not/AZone", lateEveningInBoston)).toBe("2026-10-28");
   });
 
   it("moves between months", () => {

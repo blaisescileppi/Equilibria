@@ -38,6 +38,22 @@ export function todayISO(now: Date = new Date()): ISODate {
   return toISODate(now);
 }
 
+export function isValidTimeZone(timeZone: string): boolean {
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Today's date in an IANA time zone such as "America/New_York". */
+export function todayInTimeZone(timeZone: string, now: Date = new Date()): ISODate {
+  if (!isValidTimeZone(timeZone)) return todayISO(now);
+  // en-CA formats dates as YYYY-MM-DD.
+  return new Intl.DateTimeFormat("en-CA", { timeZone }).format(now);
+}
+
 /** Today's date in the viewer's own time zone. */
 export function localTodayISO(now: Date = new Date()): ISODate {
   const y = now.getFullYear();

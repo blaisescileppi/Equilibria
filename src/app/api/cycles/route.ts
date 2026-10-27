@@ -1,6 +1,5 @@
-import { todayISO } from "@/lib/dates";
 import { cycleSchema } from "@/lib/validation";
-import { parseInput, readJson, requireApiUser, route } from "@/server/http";
+import { parseInput, readJson, requestToday, requireApiUser, route } from "@/server/http";
 import { createCycle, getCycleInsights, listCycles } from "@/server/services/cycles";
 
 // Route Handlers stay thin: authenticate, validate, call a service, respond.
@@ -9,7 +8,7 @@ export const GET = route(async (req) => {
   const user = await requireApiUser(req);
   const [cycles, insights] = await Promise.all([
     listCycles(user.id),
-    getCycleInsights(user.id, todayISO()),
+    getCycleInsights(user.id, requestToday(req)),
   ]);
   return Response.json({ cycles, insights });
 });

@@ -2,6 +2,7 @@ import "server-only";
 import type { NextRequest } from "next/server";
 import type { z } from "zod";
 import { Prisma } from "@/generated/prisma/client";
+import { todayInTimeZone } from "@/lib/dates";
 import { fieldErrors } from "@/lib/validation";
 import { SESSION_COOKIE, validateSessionToken, type SessionUser } from "./auth/session";
 
@@ -57,6 +58,11 @@ export function parseInput<S extends z.ZodType>(schema: S, data: unknown): z.out
 
 export function searchParamsObject(req: NextRequest): Record<string, string> {
   return Object.fromEntries(req.nextUrl.searchParams);
+}
+
+/** The caller's "today", from the time zone cookie their browser set. */
+export function requestToday(req: NextRequest): string {
+  return todayInTimeZone(req.cookies.get("tz")?.value ?? "UTC");
 }
 
 /** Route Handlers read the cookie from the request so they're testable without Next's runtime. */
